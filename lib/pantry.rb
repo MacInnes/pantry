@@ -26,9 +26,7 @@ class Pantry
   end
 
   def shopping_list
-    collector = {}
-
-    @recipes.each do |recipe|
+    @recipes.reduce({}) do |collector, recipe|
       recipe.ingredients.keys.each do |ingredient|
         if collector[ingredient]
           collector[ingredient] += recipe.ingredients[ingredient]
@@ -36,8 +34,8 @@ class Pantry
           collector[ingredient] = recipe.ingredients[ingredient]
         end
       end
+      collector
     end
-    collector
   end
 
   def print_shopping_list
@@ -45,14 +43,14 @@ class Pantry
     ingredients = list.keys
     amounts = list.values
 
-    output = ""
-    ingredients.each_with_index do |ingredient, index|
-      output += "* #{ingredient}: #{amounts[index]}"
-      unless index == ingredients.length - 1
-        output += "\n"
+    ingredients.reduce("") do |collector, ingredient|
+      index = ingredients.find_index(ingredient)
+      collector += "* #{ingredient}: #{amounts[index]}"
+      unless ingredients.last == ingredient
+        collector += "\n"
       end
+      collector
     end
-    output
   end
 
   def add_to_cookbook(recipe)
@@ -64,27 +62,21 @@ class Pantry
   end
 
   def how_many_can_i_make
-    smallest_amount_per_recipe = {}
     recipes = valid_recipes
-    recipes.each do |recipe|
-      smallest_amount_per_recipe[recipe.name] = recipe.ingredients.map do |ingredient, amount|
+    recipes.reduce({}) do |collector, recipe|
+      collector[recipe.name] = recipe.ingredients.map do |ingredient, amount|
         @stock[ingredient] / amount
       end.min
+      collector
     end
-    smallest_amount_per_recipe
   end
 
   def valid_recipes
-    collector = []
-    @cookbook.each do |recipe|
-      has_stock = recipe.ingredients.all? do |ingredient, amount|
+    @cookbook.select do |recipe|
+      recipe.ingredients.all? do |ingredient, amount|
         @stock[ingredient] >= amount
       end
-      if has_stock
-        collector << recipe
-      end
     end
-    collector
   end
 
 end
