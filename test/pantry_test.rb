@@ -41,7 +41,7 @@ class PantryTest < Minitest::Test
 
     assert_instance_of Recipe, pantry.recipes[0]
     assert_equal 1, pantry.recipes.length
-    assert_equal ({"Cheese" => 20, "Flour" => 20}), pantry.recipes[0].ingredients
+    assert_equal ({"Cheese" => 20, "Flour" => 20}), pantry.recipes.first.ingredients
   end
 
   def test_it_returns_a_shopping_list
@@ -85,6 +85,89 @@ class PantryTest < Minitest::Test
 
     assert_equal expected, pantry.print_shopping_list
 
+  end
+
+  def test_it_can_add_to_a_cookbook
+    pantry = Pantry.new
+
+    recipe_1 = Recipe.new("Cheese Pizza")
+    recipe_1.add_ingredient("Cheese", 20)
+    recipe_1.add_ingredient("Flour", 20)
+
+    recipe_2 = Recipe.new("Pickles")
+    recipe_2.add_ingredient("Brine", 10)
+    recipe_2.add_ingredient("Cucumbers", 30)
+
+    recipe_3 = Recipe.new("Peanuts")
+    recipe_3.add_ingredient("Raw nuts", 10)
+    recipe_3.add_ingredient("Salt", 10)
+
+    pantry.add_to_cookbook(recipe_1)
+    pantry.add_to_cookbook(recipe_2)
+    pantry.add_to_cookbook(recipe_3)
+
+    assert_equal 3, pantry.cookbook.length
+    assert_instance_of Recipe, pantry.cookbook.first
+  end
+
+  def test_what_can_i_make
+    pantry = Pantry.new
+
+    recipe_1 = Recipe.new("Cheese Pizza")
+    recipe_1.add_ingredient("Cheese", 20)
+    recipe_1.add_ingredient("Flour", 20)
+
+    recipe_2 = Recipe.new("Pickles")
+    recipe_2.add_ingredient("Brine", 10)
+    recipe_2.add_ingredient("Cucumbers", 30)
+
+    recipe_3 = Recipe.new("Peanuts")
+    recipe_3.add_ingredient("Raw nuts", 10)
+    recipe_3.add_ingredient("Salt", 10)
+
+    pantry.add_to_cookbook(recipe_1)
+    pantry.add_to_cookbook(recipe_2)
+    pantry.add_to_cookbook(recipe_3)
+
+    pantry.restock("Cheese", 10)
+    pantry.restock("Flour", 20)
+    pantry.restock("Brine", 40)
+    pantry.restock("Cucumbers", 120)
+    pantry.restock("Raw nuts", 20)
+    pantry.restock("Salt", 20)
+
+
+    assert_equal ["Pickles", "Peanuts"], pantry.what_can_i_make
+  end
+
+  def test_how_many_can_i_make
+    pantry = Pantry.new
+
+    recipe_1 = Recipe.new("Cheese Pizza")
+    recipe_1.add_ingredient("Cheese", 20)
+    recipe_1.add_ingredient("Flour", 20)
+
+    recipe_2 = Recipe.new("Pickles")
+    recipe_2.add_ingredient("Brine", 10)
+    recipe_2.add_ingredient("Cucumbers", 30)
+
+    recipe_3 = Recipe.new("Peanuts")
+    recipe_3.add_ingredient("Raw nuts", 10)
+    recipe_3.add_ingredient("Salt", 10)
+
+    pantry.add_to_cookbook(recipe_1)
+    pantry.add_to_cookbook(recipe_2)
+    pantry.add_to_cookbook(recipe_3)
+
+    pantry.restock("Cheese", 10)
+    pantry.restock("Flour", 20)
+    pantry.restock("Brine", 40)
+    pantry.restock("Cucumbers", 120)
+    pantry.restock("Raw nuts", 20)
+    pantry.restock("Salt", 20)
+
+
+    assert_equal ({"Pickles" => 4, "Peanuts" => 2}), pantry.how_many_can_i_make
   end
 
 end

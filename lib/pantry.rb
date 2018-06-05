@@ -1,10 +1,12 @@
 class Pantry
   attr_reader :stock,
-              :recipes
+              :recipes,
+              :cookbook
   
   def initialize
     @stock = {}
     @recipes = []
+    @cookbook = []
   end
 
   def restock(name, amount)
@@ -44,16 +46,45 @@ class Pantry
     amounts = list.values
 
     output = ""
-
     ingredients.each_with_index do |ingredient, index|
       output += "* #{ingredient}: #{amounts[index]}"
       unless index == ingredients.length - 1
         output += "\n"
       end
     end
-
     output
+  end
 
+  def add_to_cookbook(recipe)
+    @cookbook << recipe
+  end
+
+  def what_can_i_make
+    valid_recipes.map { |recipe| recipe.name }
+  end
+
+  def how_many_can_i_make
+    smallest_amount_per_recipe = {}
+    recipes = valid_recipes
+    recipes.each do |recipe|
+      smallest_amount_per_recipe[recipe.name] = recipe.ingredients.map do |ingredient, amount|
+        @stock[ingredient] / amount
+      end.min
+    end
+    smallest_amount_per_recipe
+  end
+
+  def valid_recipes
+    collector = []
+    @cookbook.each do |recipe|
+      has_stock = recipe.ingredients.all? do |ingredient, amount|
+        @stock[ingredient] >= amount
+      end
+      if has_stock
+        collector << recipe
+      end
+    end
+    collector
   end
 
 end
